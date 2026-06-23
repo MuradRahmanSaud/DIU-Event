@@ -98,16 +98,20 @@ app.get("/api/events", async (req, res) => {
 
 // Helper function to send requests to Google Apps Script Web App
 async function executeGASAction(payload: any) {
+  console.log("Executing GAS Action:", JSON.stringify(payload));
   const response = await fetch(GAS_URL, {
     method: "POST",
     headers: {
       "Content-Type": "text/plain;charset=utf-8", // GAS doPost receives JSON inside e.postData.contents of text/plain
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
-    throw new Error(`Gas Action failed with server status ${response.status}`);
+    const errorText = await response.text();
+    console.error(`GAS Action status ${response.status}: ${errorText}`);
+    throw new Error(`Gas Action failed with server status ${response.status}: ${errorText}`);
   }
 
   const result = await response.json();
