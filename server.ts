@@ -14,7 +14,7 @@ const GID = "1368831261";
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwYHjpYpCjJGwhYiQXPcLFLaQ2D_oI7TuAxunLjFx6iH8__wOMthCkM4eAYs6uUjLE-lw/exec";
 
 // CSV custom parser (high-performance & standard-compliant) to avoid extra dependencies or offset mismatches
-function parseCSV(csvText: string): any[] {
+function parseCSV(csvText: string, trimValues = true): any[] {
   const result: any[][] = [];
   let currentLine: string[] = [];
   let currentField = "";
@@ -63,7 +63,10 @@ function parseCSV(csvText: string): any[] {
   return dataRows.map(rowFields => {
     const obj: any = {};
     headers.forEach((h, index) => {
-      let val = rowFields[index] !== undefined ? rowFields[index].trim() : "";
+      let val = rowFields[index] !== undefined ? rowFields[index] : "";
+      if (trimValues) {
+        val = val.trim();
+      }
       obj[h] = val;
     });
     return obj;
@@ -274,7 +277,7 @@ async function findExactRundownActivity(searchActivity: string, eventTitle: stri
     });
     if (!response.ok) return searchActivity;
     const csvText = await response.text();
-    const rows = parseCSV(csvText);
+    const rows = parseCSV(csvText, false);
     for (const row of rows) {
       const actVal = row["Activity"] || "";
       const evVal = row["Event Title"] || "";
@@ -282,6 +285,9 @@ async function findExactRundownActivity(searchActivity: string, eventTitle: stri
         return actVal;
       }
     }
+    console.log(`findExactRundownActivity: NOT FOUND. Target: ${searchActivity}, EventTitle: ${eventTitle}`);
+    console.log("Rows available:", JSON.stringify(rows.slice(0, 5)));
+    
   } catch (error) {
     console.error("Error resolving exact rundown activity from sheet:", error);
   }
@@ -306,6 +312,9 @@ app.get("/api/rundowns", async (req, res) => {
     
     const csvText = await response.text();
     const dataObj = parseCSV(csvText);
+    if (dataObj.length > 0) {
+      console.log("Rundown headers:", Object.keys(dataObj[0]));
+    }
     res.json({ status: "success", data: dataObj });
   } catch (error: any) {
     console.error("Error fetching rundowns:", error);
