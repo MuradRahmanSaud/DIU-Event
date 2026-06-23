@@ -78,7 +78,8 @@ app.get("/api/events", async (req, res) => {
     const response = await fetch(csvUrl, {
       headers: {
         "cache-control": "no-cache",
-        "pragma": "no-cache"
+        "pragma": "no-cache",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
     });
     
@@ -144,7 +145,8 @@ async function findExactSheetTitle(searchTitle: string): Promise<string> {
     const response = await fetch(csvUrl, {
       headers: {
         "cache-control": "no-cache",
-        "pragma": "no-cache"
+        "pragma": "no-cache",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
     });
     if (!response.ok) return searchTitle;
@@ -263,7 +265,8 @@ async function findExactRundownActivity(searchActivity: string, eventTitle: stri
     const response = await fetch(csvUrl, {
       headers: {
         "cache-control": "no-cache",
-        "pragma": "no-cache"
+        "pragma": "no-cache",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
     });
     if (!response.ok) return searchActivity;
@@ -289,7 +292,8 @@ app.get("/api/rundowns", async (req, res) => {
     const response = await fetch(csvUrl, {
       headers: {
         "cache-control": "no-cache",
-        "pragma": "no-cache"
+        "pragma": "no-cache",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
     });
     
