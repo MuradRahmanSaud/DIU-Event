@@ -384,7 +384,7 @@ export function RundownView({
                         {/* Date Header Row */}
                         <tr className="bg-slate-100 select-none">
                             <td colSpan={selectedEvent ? 4 : 3} className="px-3 py-2 font-bold text-[11px] text-emerald-800 uppercase tracking-wider">
-                              <div className="flex items-center gap-2 whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-2 whitespace-nowrap">
                                 <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                                 <span>
                                   {(() => {
@@ -492,9 +492,11 @@ export function RundownView({
                                 <div className="font-semibold text-[11.5px] break-words">{item["Activity"]}</div>
                               </td>
                               <td className="px-3 py-2 text-center select-none">
-                                <div className="text-[12px] font-bold text-slate-700 tracking-tight">
-                                  {completionPercentage}%
-                                </div>
+                                {todoList.length > 0 && (
+                                  <div className="text-[12px] font-bold text-slate-700 tracking-tight">
+                                    {completionPercentage}%
+                                  </div>
+                                )}
                               </td>
                               {selectedEvent && (
                                 <td className="px-3 py-2 text-center select-none" onClick={(e) => e.stopPropagation()}>
