@@ -41,6 +41,55 @@ function serializeToDos(list: ToDoItem[]): string {
   return JSON.stringify(list);
 }
 
+function parseDisplayDateToInput(displayDate: string): string {
+  if (!displayDate) return "";
+  const trimmed = displayDate.trim();
+  
+  // Try parsing standard YYYY-MM-DD first
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+  
+  // Try parsing MMM DD, YYYY
+  // e.g., "Nov 19, 2026" or "Jun 19, 2026" or "Nov 19 2026"
+  const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  const m = trimmed.toLowerCase().match(/([a-z]{3})\s*(\d{1,2})[,\s]+(\d{4})/);
+  if (m) {
+    const monthIndex = months.indexOf(m[1]);
+    if (monthIndex !== -1) {
+      const mm = String(monthIndex + 1).padStart(2, "0");
+      const dd = m[2].padStart(2, "0");
+      const yyyy = m[3];
+      return `${yyyy}-${mm}-${dd}`;
+    }
+  }
+  
+  // Fallback to standard javascript Date parse
+  const d = new Date(trimmed);
+  if (!isNaN(d.getTime())) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  
+  return "";
+}
+
+function formatInputDateToDisplay(dateVal: string): string {
+  if (!dateVal) return "";
+  const parts = dateVal.split("-");
+  if (parts.length !== 3) return dateVal;
+  const year = parts[0];
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  if (monthIdx >= 0 && monthIdx < 12) {
+    return `${months[monthIdx]} ${day}, ${year}`;
+  }
+  return dateVal;
+}
+
 interface RundownViewProps {
   activeFullEvent: DIUEvent;
   selectedEvent: DIUEvent | null;
@@ -155,12 +204,16 @@ export function RundownView({
   });
 
   const [selectedRundownActivity, setSelectedRundownActivity] = useState<string | null>(null);
+  const [editingDateKey, setEditingDateKey] = useState<string | null>(null);
   const [newTodoText, setNewTodoText] = useState("");
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
   const [editingTodoText, setEditingTodoText] = useState("");
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Track active event title to reset selection when changing events
+  const prevEventTitleRef = useRef<string>("");
 
   // Operation Queue
   const operationQueue = useRef<Promise<void>>(Promise.resolve());
@@ -178,15 +231,25 @@ export function RundownView({
   };
 
   useEffect(() => {
-    if (eventRundowns.length > 0) {
-      const stillExists = eventRundowns.some(r => r["Activity"] === selectedRundownActivity);
-      if (!stillExists || !selectedRundownActivity) {
+    const currentEventTitle = activeFullEvent["Event Title"] || "";
+    if (currentEventTitle !== prevEventTitleRef.current) {
+      prevEventTitleRef.current = currentEventTitle;
+      if (eventRundowns.length > 0) {
         setSelectedRundownActivity(eventRundowns[0]["Activity"]);
+      } else {
+        setSelectedRundownActivity(null);
       }
     } else {
-      setSelectedRundownActivity(null);
+      if (eventRundowns.length > 0) {
+        const stillExists = eventRundowns.some(r => r["Activity"] === selectedRundownActivity);
+        if (!stillExists || !selectedRundownActivity) {
+          setSelectedRundownActivity(eventRundowns[0]["Activity"]);
+        }
+      } else {
+        setSelectedRundownActivity(null);
+      }
     }
-  }, [activeFullEvent, rundowns, selectedRundownActivity]);
+  }, [activeFullEvent, eventRundowns, selectedRundownActivity]);
 
   const selectedRundown = eventRundowns.find(r => r["Activity"] === selectedRundownActivity) || eventRundowns[0] || null;
   const currentToDos = parseToDos(selectedRundown?.["To-Do"]);
@@ -306,13 +369,13 @@ export function RundownView({
             {/* Left Column: Live Timeline Table */}
             <div className="lg:col-span-7 xl:col-span-8 flex flex-col relative">
               <div className="overflow-both overflow-x-auto overflow-y-auto compact-scrollbar max-h-[calc(100vh-230px)] min-h-[400px] border border-slate-200 rounded-lg bg-white shadow-3xs relative pb-14">
-                <table className="w-full text-left border-collapse min-w-[500px]">
+                <table className="w-full text-left border-collapse min-w-[650px]">
                   <thead>
                     <tr className="text-[9.5px] uppercase tracking-wider font-extrabold text-slate-500 select-none">
-                      <th className="sticky top-0 bg-slate-100 px-2 py-2 w-[15%] z-20 shadow-[0_1.5px_0_0_rgba(226,232,240,1)] border-b border-slate-200">Time & Date</th>
-                      <th className="sticky top-0 bg-slate-100 px-2 py-2 w-[75%] z-20 shadow-[0_1.5px_0_0_rgba(226,232,240,1)] border-b border-slate-200">Activity Plan Details</th>
-                      <th className="sticky top-0 bg-slate-100 px-2 py-2 w-[10%] text-center z-20 shadow-[0_1.5px_0_0_rgba(226,232,240,1)] border-b border-slate-200">Status</th>
-                      {selectedEvent && <th className="sticky top-0 bg-slate-100 px-2 py-2 w-[10%] text-center z-20 shadow-[0_1.5px_0_0_rgba(226,232,240,1)] border-b border-slate-200">Actions</th>}
+                      <th className="sticky top-0 bg-slate-100 px-3 py-2 w-[22%] z-20 shadow-[0_1.5px_0_0_rgba(226,232,240,1)] border-b border-slate-200">Time & Date</th>
+                      <th className="sticky top-0 bg-slate-100 px-3 py-2 w-[58%] z-20 shadow-[0_1.5px_0_0_rgba(226,232,240,1)] border-b border-slate-200">Activity Plan Details</th>
+                      <th className="sticky top-0 bg-slate-100 px-3 py-2 w-[10%] text-center z-20 shadow-[0_1.5px_0_0_rgba(226,232,240,1)] border-b border-slate-200">Status</th>
+                      {selectedEvent && <th className="sticky top-0 bg-slate-100 px-3 py-2 w-[10%] text-center z-20 shadow-[0_1.5px_0_0_rgba(226,232,240,1)] border-b border-slate-200">Actions</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-[11px] text-slate-705 font-sans">
@@ -377,31 +440,64 @@ export function RundownView({
                               onClick={() => setSelectedRundownActivity(item["Activity"])}
                               className={`transition-all divide-x divide-slate-100 cursor-pointer ${
                                 isRowSelected 
-                                  ? "bg-emerald-50/20 font-medium border-l-2 border-l-emerald-500" 
+                                  ? "bg-emerald-50 border-l-4 border-l-emerald-500 font-bold text-slate-900 shadow-3xs" 
                                   : "hover:bg-slate-50/50"
                               }`}
                             >
-                              <td className="px-2 py-1.5 font-mono text-center">
-                                {item["Time"] ? (
-                                  <div className="font-semibold text-slate-600 text-[12px] leading-tight flex flex-col gap-0.5">
-                                    {item["Time"].split("-").map((t, i) => (
-                                      <div key={i}>{t.trim()}</div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <span className="text-slate-400 italic">No time</span>
-                                )}
+                              <td className="px-3 py-2 font-mono text-left">
+                                <div className="flex flex-col items-start">
+                                  <span className="font-semibold text-slate-600 text-[11px] whitespace-nowrap">
+                                    {item["Time"] || "No time"}
+                                  </span>
+                                  {editingDateKey === `${item["Activity"]}-${index}` ? (
+                                    <input
+                                      type="date"
+                                      value={parseDisplayDateToInput(item["Date"])}
+                                      onClick={(e) => e.stopPropagation()}
+                                      onChange={async (e) => {
+                                        e.stopPropagation();
+                                        const newDateVal = e.target.value;
+                                        if (newDateVal) {
+                                          const formattedValue = formatInputDateToDisplay(newDateVal);
+                                          setEditingDateKey(null);
+                                          enqueueOperation(async () => {
+                                            await onSaveRundown({ ...item, Date: formattedValue }, true, item["Activity"]);
+                                          });
+                                        } else {
+                                          setEditingDateKey(null);
+                                        }
+                                      }}
+                                      onBlur={() => setEditingDateKey(null)}
+                                      className="font-sans text-[10px] text-slate-800 px-1 py-0.5 mt-0.5 border border-emerald-300 rounded focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white max-w-[120px] shadow-xs"
+                                      autoFocus
+                                    />
+                                  ) : (
+                                    <span 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingDateKey(`${item["Activity"]}-${index}`);
+                                      }}
+                                      className="text-slate-400 hover:text-emerald-600 hover:bg-slate-100 px-1 py-0.5 rounded transition-all cursor-pointer inline-flex items-center gap-1 group/date font-semibold text-[9.5px] whitespace-nowrap mt-0.5"
+                                      title="Click to change date"
+                                    >
+                                      <Calendar className="w-2.5 h-2.5 opacity-60 group-hover/date:opacity-100" />
+                                      <span className="border-b border-dashed border-slate-300 group-hover/date:border-emerald-500">
+                                        {item["Date"] || "No date"}
+                                      </span>
+                                    </span>
+                                  )}
+                                </div>
                               </td>
-                              <td className="px-2 py-1.5 leading-relaxed font-sans text-slate-800">
+                              <td className="px-3 py-2 leading-relaxed font-sans text-slate-800">
                                 <div className="font-semibold text-[11.5px] break-words">{item["Activity"]}</div>
                               </td>
-                              <td className="px-2 py-1.5 text-center select-none">
+                              <td className="px-3 py-2 text-center select-none">
                                 <div className="text-[12px] font-bold text-slate-700 tracking-tight">
                                   {completionPercentage}%
                                 </div>
                               </td>
                               {selectedEvent && (
-                                <td className="px-2 py-1.5 text-center select-none" onClick={(e) => e.stopPropagation()}>
+                                <td className="px-3 py-2 text-center select-none" onClick={(e) => e.stopPropagation()}>
                                   <div className="flex items-center justify-center gap-1.5">
                                     <button
                                       type="button"

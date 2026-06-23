@@ -99,60 +99,64 @@ export function FullEventDetailsView({
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider leading-none">
-            {activeFullEvent["Event Category"] || "Program"}
-          </span>
-          <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider leading-none ${
-            activeFullEvent["Event Status"] === "Ongoing" ? "bg-amber-100 text-amber-800 animate-pulse" :
-            activeFullEvent["Event Status"] === "Completed" ? "bg-emerald-100 text-emerald-800" :
-            activeFullEvent["Event Status"] === "Cancelled" ? "bg-rose-100 text-rose-800" :
-            "bg-slate-100 text-slate-700"
-          }`}>
-            {activeFullEvent["Event Status"] || "Upcoming"}
-          </span>
-        </div>
-        
-        <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight tracking-tight font-sans mb-4 pr-32" title={activeFullEvent["Event Title"]}>
-          {activeFullEvent["Event Title"]}
-        </h2>
-
-        {/* Modern Info Grid inside the header strip */}
-        <div className="flex flex-wrap gap-y-2 gap-x-5 pt-3 border-t border-slate-200/70 text-slate-600 text-xs font-sans">
-          {/* Organizer Info item */}
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded bg-white border border-slate-100 text-slate-500 shadow-3xs">
-              <Building className="w-3.5 h-3.5 text-slate-500" />
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider leading-none">
+                {activeFullEvent["Event Category"] || "Program"}
+              </span>
+              <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded uppercase tracking-wider leading-none ${
+                activeFullEvent["Event Status"] === "Ongoing" ? "bg-amber-100 text-amber-800 animate-pulse" :
+                activeFullEvent["Event Status"] === "Completed" ? "bg-emerald-100 text-emerald-800" :
+                activeFullEvent["Event Status"] === "Cancelled" ? "bg-rose-100 text-rose-800" :
+                "bg-slate-100 text-slate-700"
+              }`}>
+                {activeFullEvent["Event Status"] || "Upcoming"}
+              </span>
             </div>
-            <div>
-              <span className="block text-[8.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Organizer</span>
-              <span className="text-[11px] font-semibold text-slate-705 leading-none">{activeFullEvent["Organizer"] || "DIU"}</span>
-            </div>
+            
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight tracking-tight font-sans pr-12 md:pr-0" title={activeFullEvent["Event Title"]}>
+              {activeFullEvent["Event Title"]}
+            </h2>
           </div>
 
-          {/* Start Date item */}
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded bg-white border border-slate-100 text-emerald-600 shadow-3xs">
-              <Calendar className="w-3.5 h-3.5 text-emerald-500" />
-            </div>
-            <div>
-              <span className="block text-[8.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Start Date</span>
-              <span className="text-[11px] font-semibold text-slate-705 leading-none font-mono">{activeFullEvent["Start Time"] || "N/A"}</span>
-            </div>
-          </div>
-
-          {/* End Date item (conditional) */}
-          {activeFullEvent["End Time"] && (
+          {/* Organizer, Start Date, and End Date Info Grid - Positioned top-right/side alignment */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 shrink-0 bg-white/50 backdrop-blur-xs p-2 sm:px-3 rounded-lg border border-slate-150 shadow-4xs">
+            {/* Organizer Info item */}
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded bg-white border border-slate-100 text-blue-500 shadow-3xs">
-                <Clock className="w-3.5 h-3.5 text-blue-400" />
+              <div className="p-1 rounded bg-white border border-slate-100 text-slate-500 shadow-4xs flex items-center justify-center">
+                <Building className="w-3.5 h-3.5 text-slate-400" />
               </div>
               <div>
-                <span className="block text-[8.5px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">End Date</span>
-                <span className="text-[11px] font-semibold text-slate-705 leading-none font-mono">{activeFullEvent["End Time"]}</span>
+                <span className="block text-[7.5px] font-extrabold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Organizer</span>
+                <span className="text-[10.5px] font-bold text-slate-700 leading-none">{activeFullEvent["Organizer"] || "DIU"}</span>
               </div>
             </div>
-          )}
+
+            {/* Start Date item */}
+            <div className="flex items-center gap-2 border-l border-slate-200/60 pl-3">
+              <div className="p-1 rounded bg-white border border-slate-100 text-emerald-600 shadow-4xs flex items-center justify-center">
+                <Calendar className="w-3.5 h-3.5 text-emerald-500" />
+              </div>
+              <div>
+                <span className="block text-[7.5px] font-extrabold text-slate-400 uppercase tracking-widest leading-none mb-0.5">Start Date</span>
+                <span className="text-[10.5px] font-bold text-slate-700 leading-none font-mono">{activeFullEvent["Start Time"] || "N/A"}</span>
+              </div>
+            </div>
+
+            {/* End Date item (conditional) */}
+            {activeFullEvent["End Time"] && (
+              <div className="flex items-center gap-2 border-l border-slate-200/60 pl-3">
+                <div className="p-1 rounded bg-white border border-slate-100 text-blue-500 shadow-4xs flex items-center justify-center">
+                  <Clock className="w-3.5 h-3.5 text-blue-400" />
+                </div>
+                <div>
+                  <span className="block text-[7.5px] font-extrabold text-slate-400 uppercase tracking-widest leading-none mb-0.5">End Date</span>
+                  <span className="text-[10.5px] font-bold text-slate-700 leading-none font-mono">{activeFullEvent["End Time"]}</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
