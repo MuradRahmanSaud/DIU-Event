@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "Fira Code", monospace;
+  
+  --color-diu-green: #0d9488; /* Emerald teal */
+  --color-diu-green-dark: #0f766e;
+  --color-diu-blue: #1d4ed8; /* Royal blue */
+  --color-diu-gold: #eab308; /* Daffodil gold */
+}
+
+/* Bento Grid Theme Styling */
+.bento-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bento-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Custom super-fine scrollbars */
+.compact-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.compact-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.compact-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.compact-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Sparkle/Pulse keyframe */
+@keyframes delicate-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(0.98); }
+}
+
+@keyframes loading-progress {
+  0% { width: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+
+.sparkle-slow {
+  animation: delicate-pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-loading-bar {
+  animation: loading-progress 1.5s ease-in-out infinite;
+}
+

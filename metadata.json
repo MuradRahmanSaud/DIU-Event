@@ -1,0 +1,6 @@
+{
+  "name": "DIU Event Management",
+  "description": "A compact and high-performance event management system for DIU events, integrated with Google Sheets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
